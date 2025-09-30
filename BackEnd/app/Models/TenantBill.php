@@ -11,11 +11,15 @@ class TenantBill extends Model
 
     protected $table = 'tenant_bills';
 
+    // 
     protected $fillable = [
         'lease_id',
-        'tenant_id', 
+        'tenant_id',
         'user_id',
         'amount',
+        'paid_amount',
+        'months_count',
+        'paid_months',
         'billing_period_start',
         'billing_period_end',
         'billing_type',
@@ -24,7 +28,12 @@ class TenantBill extends Model
         'billing_month',
         'days_used',
     ];
-
+    protected $casts = [
+        'amount' => 'decimal:2',
+        'paid_amount' => 'decimal:2',
+        'billing_period_start' => 'date',
+        'billing_period_end' => 'date',
+    ];
     public function lease()
     {
         return $this->belongsTo(Lease::class);
