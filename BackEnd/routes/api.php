@@ -9,6 +9,16 @@ use App\Http\Controllers\Api\TenantBillController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\TenantFormController;
 use App\Http\Controllers\Api\MaintenanceController;
+use App\Http\Controllers\Api\AuthController;
+
+Route::post('register', [AuthController::class,'register']);
+Route::post('login', [AuthController::class,'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('logout', [AuthController::class,'logout']);
+    Route::get('user', [AuthController::class,'me']);
+    // other protected APIs go here
+});
 
 Route::apiResource('maintenances', MaintenanceController::class);
 

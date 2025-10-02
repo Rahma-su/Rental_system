@@ -1,11 +1,11 @@
 <template>
   <div
   class="flex h-screen min-h-screen font-times text-gray-800 relative"
-  :style="route.path !== '/' ? { backgroundColor: '#D1D3D4' } : {}"
+  :style="route.path !== '/dashboard' ? { backgroundColor: '#D1D3D4' } : {}"
 >
   <!-- Purple background only on Dashboard -->
   <div
-    v-if="route.path === '/'"
+    v-if="route.path === '/dashboard'"
     class="absolute top-0 left-0 w-full"
     :style="{ height: '35%', backgroundColor: '#9AA6B2' }"
   >
@@ -75,7 +75,7 @@
   </h1> -->
   <h1
   class="text-2xl font-semibold drop-shadow uppercase"
-  :class="route.path === '/' ? 'text-white' : 'text-gray-800'"
+  :class="route.path === '/dashboard' ? 'text-white' : 'text-gray-800'"
 >
   {{ pageTitle }}
 </h1>
@@ -88,7 +88,7 @@
       class="px-3 py-2 border rounded focus:outline-none focus:ring focus:ring-blue-200"
     />
     <button
-      class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-blue-400 transition-colors"
+      @click="logout" class="px-4 py-2 bg-gray-700 text-white rounded hover:bg-blue-400 transition-colors"
     >
       Logout
     </button>
@@ -105,13 +105,19 @@
 
 <script setup>
 import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router"; // ✅ import useRouter
 
 const route = useRoute();
+const router = useRouter(); // ✅ define router
+
+const logout = () => {
+  localStorage.removeItem("token");
+  router.push("/login"); // ✅ works now
+};
 
 const pageTitle = computed(() => {
   switch (route.path) {
-    case "/":
+    case "/dashboard":
       return "Dashboard";
     case "/units":
       return "Units";
@@ -127,11 +133,14 @@ const pageTitle = computed(() => {
       return "Leases List";
     case "/billmanagment":
       return "Bill Management";
+    case "/maintenance":
+      return "Maintenance";
     default:
       return "Page";
   }
 });
 </script>
+
 
 <style scoped>
 .font-times {

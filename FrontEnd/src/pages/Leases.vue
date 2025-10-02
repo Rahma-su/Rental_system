@@ -115,8 +115,10 @@
               <td class="border px-2 py-1">{{ lease.lease_end_date }}</td>
               <td class="border px-2 py-1">{{ lease.monthly_rent }}</td>
               <td class="border px-2 py-1">
-                <button @click="editLease(lease)" class="text-blue-600 hover:underline mr-2">Edit</button>
+                 <button @click="editLease(lease)" class="text-blue-600 hover:underline mr-2">Edit</button>
+                 <button @click="deleteLease(lease.id)" class="text-red-600 hover:underline">Delete</button>
               </td>
+
             </tr>
             <tr v-if="leases.length === 0">
               <td colspan="7" class="text-center text-gray-500 py-4">No leases found.</td>
@@ -206,6 +208,18 @@ const editLease = (lease) => {
   form.grace_period = lease.grace_period
   form.late_fee_penalty = lease.late_fee_penalty
   form.notes = lease.notes
+}
+const deleteLease = async (id) => {
+  if (!confirm("Are you sure you want to delete this lease?")) return
+
+  try {
+    await api.delete(`/leases/${id}`)
+    leases.value = leases.value.filter(lease => lease.id !== id)
+    successMessage.value = "Lease deleted successfully!"
+  } catch (err) {
+    console.error(err)
+    alert("Error deleting lease.")
+  }
 }
 
 const resetForm = (clearMessage = true) => {
