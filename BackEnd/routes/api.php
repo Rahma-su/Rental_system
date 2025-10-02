@@ -8,6 +8,17 @@ use App\Http\Controllers\Api\LeaseController;
 use App\Http\Controllers\Api\TenantBillController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\TenantFormController;
+use App\Http\Controllers\Api\MaintenanceController;
+
+Route::apiResource('maintenances', MaintenanceController::class);
+
+
+
+
+// exported
+Route::get('/unit/export', [UnitController::class, 'export'])->name('unit.export');
+Route::get('/lease/export', [LeaseController::class, 'export'])->name('lease.export');
+Route::get('/tenantform/export', [TenantFormController::class, 'export'])->name('tenant.export');
 
 Route::apiResource('tenantform', TenantFormController::class);
 
@@ -30,5 +41,7 @@ Route::apiResource('leases', LeaseController::class);
 Route::get('/dashboard', [DashboardController::class, 'index']);
 Route::apiResource('units', UnitController::class);
 Route::apiResource('payments', PaymentController::class);
+
+
 
 Route::get('/wallets/tenant/{tenant_id}', [WalletController::class, 'getByTenant']);

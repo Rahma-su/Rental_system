@@ -2,7 +2,7 @@
 
 namespace App\Models;
 use App\Models\TenantForm;
-
+use App\Models\Units;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

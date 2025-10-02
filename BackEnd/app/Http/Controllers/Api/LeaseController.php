@@ -6,15 +6,28 @@ use App\Http\Controllers\Controller;
 use App\Models\Lease;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use App\Exports\LeasesExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LeaseController extends Controller
 {
-    // Show all leases
-    public function index()
-    {
-        $leases = Lease::with(['unit', 'tenant'])->get();
-        return response()->json($leases);
+    // Show all leases and search 
+    public function index(Request $request)
+{
+    $query = Lease::with(['tenant', 'unit']); // eager load
+
+    if ($request->has('search') && $request->search) {
+        $search = $request->search;
+        $query->whereHas('tenant', function ($q) use ($search) {
+            $q->where('full_name', 'like', "%{$search}%");
+        })
+        ->orWhereHas('unit', function ($q) use ($search) {
+            $q->where('unit_name', 'like', "%{$search}%");
+        });
     }
+
+    return response()->json($query->orderBy('id', 'desc')->get());
+}
 
     // Show single lease
     public function show($id)
@@ -120,4 +133,9 @@ class LeaseController extends Controller
             'message' => 'Lease deleted successfully'
         ]);
     }
+    public function export()
+    {
+    return Excel::download(new LeasesExport, 'leases.xlsx');
+    }  
+    
 }

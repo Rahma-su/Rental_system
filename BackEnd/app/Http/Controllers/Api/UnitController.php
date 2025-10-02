@@ -5,15 +5,27 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Unit;
 use Illuminate\Http\Request;
+use App\Exports\UnitsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UnitController extends Controller
 {
-    // Show all units
-    public function index()
-    {
-        $units = Unit::all();
-        return response()->json($units);
+    // Show all units and search 
+    public function index(Request $request)
+   {
+    $query = Unit::query();
+
+    if ($request->has('search')) {
+        $search = $request->search;
+        $query->where('unit_name', 'like', "%{$search}%")
+              ->orWhere('monthly_rent', 'like', "%{$search}%")
+              ->orWhere('status', 'like', "%{$search}%")
+              ->orWhere('type', 'like', "%{$search}%");
     }
+
+    $units = $query->orderBy('unit_name')->get();
+    return response()->json($units);
+}
 
     // Show single unit
     public function show($id)
@@ -90,4 +102,10 @@ class UnitController extends Controller
             'message' => 'Unit deleted successfully'
         ]);
     }
+    public function export()
+    {
+    return Excel::download(new UnitsExport, 'units.xlsx');
+    }
+    
+    
 }
