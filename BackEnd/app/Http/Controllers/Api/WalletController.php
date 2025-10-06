@@ -25,7 +25,7 @@ class WalletController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tenant_id' => 'required|exists:tenants,id',
+            'tenant_id' => 'required|exists:tenantform,id',
             'balance' => 'nullable|numeric',
             'deposit_balance' => 'nullable|numeric',
         ]);
@@ -63,32 +63,34 @@ class WalletController extends Controller
 
     // Add transaction to wallet
     public function addTransaction(Request $request, $walletId)
-    {
-        $wallet = Wallet::findOrFail($walletId);
+{
+    $wallet = Wallet::findOrFail($walletId);
 
-        $request->validate([
-            'lease_id' => 'nullable|exists:leases,id',
-            'type' => 'required|in:credit,debit',
-            'amount' => 'required|numeric',
-            'description' => 'nullable|string',
-            'payment_method' => 'nullable|string',
-            'payment_date' => 'nullable|date',
-            'reference_number' => 'nullable|string',
-            'remarks' => 'nullable|string',
-        ]);
+    $request->validate([
+        'lease_id' => 'nullable|exists:leases,id',
+        'type' => 'required|in:credit,debit',
+        'amount' => 'required|numeric',
+        'description' => 'nullable|string',
+        'payment_method' => 'nullable|string',
+        'payment_date' => 'nullable|date',
+        'reference_number' => 'nullable|string',
+        'remarks' => 'required|in:rent,waterandelectricity,water,electricity,parking,other',
+    ]);
 
-        $transaction = WalletTransaction::create([
-            'wallet_id' => $wallet->id,
-            'lease_id' => $request->lease_id,
-            'type' => $request->type,
-            'amount' => $request->amount,
-            'debited' => $request->type === 'debit',
-            'description' => $request->description,
-            'payment_method' => $request->payment_method,
-            'payment_date' => $request->payment_date,
-            'reference_number' => $request->reference_number,
-            'remarks' => $request->remarks,
-        ]);
+    $transaction = WalletTransaction::create([
+        'wallet_id' => $wallet->id,
+        'lease_id' => $request->lease_id,
+        'type' => $request->type,
+        'amount' => $request->amount,
+        'debited' => $request->type === 'debit',
+        'description' => $request->description,
+        'payment_method' => $request->payment_method,
+        'payment_date' => $request->payment_date,
+        'reference_number' => $request->reference_number,
+        'remarks' => $request->remarks, // <- fixed here
+    ]);
+
+
 
         // Update wallet balance automatically
         if ($request->type === 'credit') {
@@ -100,5 +102,11 @@ class WalletController extends Controller
 
         return response()->json($transaction, 201);
     }
+    public function getTransactions($id)
+{
+    $wallet = Wallet::with('transactions')->findOrFail($id);
+    return response()->json($wallet->transactions);
+}
+
 
 }

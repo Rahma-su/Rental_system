@@ -16,14 +16,20 @@ class Wallet extends Model
     ];
 
     // Each wallet belongs to a tenant
+    // 
     public function tenant()
-    {
-        return $this->belongsTo(Tenant::class);
-    }
+{
+    return $this->belongsTo(TenantForm::class, 'tenant_id');
+}
+
 
     // One wallet can have many transactions
     public function transactions()
     {
         return $this->hasMany(WalletTransaction::class);
     }
+    protected $casts = [
+        'balance' => 'float',
+        'deposit_balance' => 'float',
+    ];
 }

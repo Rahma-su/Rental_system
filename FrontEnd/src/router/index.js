@@ -11,6 +11,8 @@ import LeasesList from "../pages/LeasesList.vue";
 import UnitsList from "../pages/UnitsList.vue";
 import Login from "../pages/Login.vue";
 import Register from "../pages/Register.vue";
+import Wallet from "../pages/Wallet.vue";
+import WalletTransactions from "../pages/WalletTransactions.vue";
 
 
 const routes = [
@@ -24,6 +26,8 @@ const routes = [
   { path: "/tenantlist", component: TenantList ,  meta: { requiresAuth: true },},
   { path: "/leaseslist", component: LeasesList ,  meta: { requiresAuth: true },},
   { path: "/unitslist", component: UnitsList ,  meta: { requiresAuth: true },},
+  { path: "/wallet", component: Wallet,  meta: { requiresAuth: true },},
+  { path: "/wallet-transactions", component: WalletTransactions ,  meta: { requiresAuth: true },},
   
   {
     path: "/login",

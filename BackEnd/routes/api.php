@@ -55,3 +55,16 @@ Route::apiResource('payments', PaymentController::class);
 
 
 Route::get('/wallets/tenant/{tenant_id}', [WalletController::class, 'getByTenant']);
+Route::get('/wallets/{id}/transactions', [WalletController::class, 'getTransactions']);
+// routes/api.php
+
+
+Route::get('/wallets', [WalletController::class, 'index']);
+Route::get('/wallets/{id}', [WalletController::class, 'show']);
+Route::post('/wallets', [WalletController::class, 'store']);
+Route::put('/wallets/{id}', [WalletController::class, 'update']);
+Route::delete('/wallets/{id}', [WalletController::class, 'destroy']);
+
+// Wallet transactions
+Route::post('/wallets/{walletId}/transactions', [WalletController::class, 'addTransaction']);
+Route::get('/wallets/{walletId}/transactions', [WalletController::class, 'getTransactions']); // <- THIS

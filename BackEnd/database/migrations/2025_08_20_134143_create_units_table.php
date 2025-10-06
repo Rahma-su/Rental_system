@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('unit_name');
             $table->decimal('size_sqm', 8, 2)->nullable();
-            $table->enum('type', ['Office', 'Shop', 'Apartment'])->nullable()->default('Shop');
+            $table->enum('type', ['Office', 'Shop','Store' ,'Locker','Studio','Other'])->nullable()->default('Shop');
             $table->boolean('with_vat')->default(false);
             $table->decimal('monthly_rent', 10, 2)->nullable();
             $table->decimal('security_deposit', 10, 2)->nullable();
