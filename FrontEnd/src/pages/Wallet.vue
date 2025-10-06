@@ -23,19 +23,15 @@
               class="hover:bg-gray-50"
             >
               <td class="border px-2 py-1">{{ index + 1 }}</td>
-
               <td class="border px-2 py-1">
                 {{ wallet.tenant?.full_name || wallet.tenant?.business_name || "N/A" }}
               </td>
-
               <td class="border px-2 py-1 text-green-600 font-semibold">
                 ${{ formatNumber(wallet.balance) }}
               </td>
-
               <td class="border px-2 py-1 text-blue-600 font-semibold">
                 ${{ formatNumber(wallet.deposit_balance) }}
               </td>
-
               <td class="border px-2 py-1 flex space-x-2">
                 <button
                   @click="viewTransactions(wallet)"
@@ -90,6 +86,7 @@
                 <th class="border px-2 py-1">Type</th>
                 <th class="border px-2 py-1">Amount</th>
                 <th class="border px-2 py-1">Date</th>
+                <th class="border px-2 py-1">Remarks</th>
               </tr>
             </thead>
             <tbody>
@@ -107,6 +104,7 @@
                   {{ tx.type === 'credit' ? '+' : '-' }}${{ formatNumber(tx.amount) }}
                 </td>
                 <td class="border px-2 py-1">{{ formatDate(tx.created_at) }}</td>
+                <td class="border px-2 py-1">{{ tx.remarks || "—" }}</td>
               </tr>
             </tbody>
           </table>
@@ -136,19 +134,19 @@ const selectedWallet = ref(null);
 const loading = ref(false);
 const loadingTransactions = ref(false);
 
-// 🧮 Format helper (safe for strings or null)
+// Format numbers safely
 const formatNumber = (num) => {
   const value = parseFloat(num);
   return isNaN(value) ? "0.00" : value.toFixed(2);
 };
 
-// 📅 Format date helper
+// Format dates safely
 const formatDate = (date) => {
   if (!date) return "—";
   return new Date(date).toLocaleDateString();
 };
 
-// 🧾 Fetch all wallets
+// Fetch wallets
 const fetchWallets = async () => {
   loading.value = true;
   try {
@@ -161,7 +159,7 @@ const fetchWallets = async () => {
   }
 };
 
-// 💳 Fetch transactions for a wallet
+// Fetch transactions for a specific wallet
 const viewTransactions = async (wallet) => {
   selectedWallet.value = wallet;
   loadingTransactions.value = true;
