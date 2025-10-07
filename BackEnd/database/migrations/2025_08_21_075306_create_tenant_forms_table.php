@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('tenant_forms', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('full_name');
             $table->string('business_name')->nullable();
             $table->string('gender')->nullable();

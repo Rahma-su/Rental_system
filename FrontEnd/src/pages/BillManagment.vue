@@ -565,7 +565,7 @@ const generateForLease = async () => {
       return
     }
 
-    await api.post('/tenant-bills/generate-for-lease', {
+    const res = await api.post('/tenant-bills/generate-for-lease', {
       lease_id: generateLeaseId.value,
       tenant_id: selectedLease.tenant_id,
       year: generateForm.value.year,
@@ -573,17 +573,32 @@ const generateForLease = async () => {
       months_count: generateForm.value.months_count,
       billing_type: generateForm.value.billing_type
     })
-    alert('Bill(s) generated successfully.')
+
+    // ✅ handle response message and skipped months
+    const msg = res?.data?.message || 'Bill(s) generated successfully.'
+    const skipped = res?.data?.skipped_months
+    if (Array.isArray(skipped) && skipped.length > 0) {
+      alert(`${msg}\n\n⚠️ Skipped duplicate months:\n${skipped.join(', ')}`)
+    } else {
+      alert(msg)
+    }
+
     closeGenerateModal()
     fetchBills()
   } catch (err) {
     console.error('generateForLease err', err)
     const msg = err?.response?.data?.message || 'Failed to generate bill(s). Check backend logs.'
-    alert(msg)
+    const skipped = err?.response?.data?.skipped_months
+    if (Array.isArray(skipped) && skipped.length > 0) {
+      alert(`${msg}\n\n⚠️ Skipped duplicate months:\n${skipped.join(', ')}`)
+    } else {
+      alert(msg)
+    }
   } finally {
     generating.value = false
   }
 }
+
 </script>
 
 <style scoped>

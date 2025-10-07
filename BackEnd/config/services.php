@@ -34,5 +34,11 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'nexmo' => [
+    'key' => env('NEXMO_KEY'),
+    'secret' => env('NEXMO_SECRET'),
+    'sms_from' => env('NEXMO_SMS_FROM'),
+],
+
 
 ];

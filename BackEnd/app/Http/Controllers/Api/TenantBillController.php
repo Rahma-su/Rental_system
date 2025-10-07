@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+use App\Notifications\BillGeneratedNotification;
+use Illuminate\Support\Facades\Notification;
 
 use App\Http\Controllers\Controller;
 use App\Models\TenantBill;
@@ -27,6 +29,7 @@ class TenantBillController extends Controller
     {
         $request->validate([
             'lease_id' => 'required|exists:leases,id',
+           
             'amount' => 'required|numeric',
             'billing_period_start' => 'required|date',
             'billing_period_end' => 'required|date|after_or_equal:billing_period_start',
@@ -50,10 +53,22 @@ class TenantBillController extends Controller
             'days_used' => $request->days_used,
         ]);
 
-        return response()->json([
-            'message' => 'Tenant bill created successfully',
-            'bill' => $bill
-        ], 201);
+
+      $lease = \App\Models\Lease::with('tenant')->find($request->lease_id);
+
+// Make sure the tenant relationship exists and returns TenantForm
+// $tenant = $lease->tenant;
+
+// if ($tenant) {
+//     // Fire notification with the newly created bill
+//     $tenant->notify(new \App\Notifications\BillGeneratedNotification($bill));
+// }
+
+return response()->json([
+    'message' => 'Tenant bill created successfully',
+    'bill' => $bill
+], 201);
+
     }
 
     // Update a bill
@@ -81,16 +96,15 @@ class TenantBillController extends Controller
         ]);
     }
 
-    // Delete a bill
-    public function destroy($id)
-    {
-        $bill = TenantBill::findOrFail($id);
-        $bill->delete();
+    
 
-        return response()->json([
-            'message' => 'Tenant bill deleted successfully'
-        ]);
-    }
+public function destroy($id)
+{
+    $bill = TenantBill::findOrFail($id);
+    $bill->delete(); // This will now soft delete the bill
+    return response()->json(['message' => 'Bill deleted successfully']);
+}
+
    public function generateForLease(Request $request)
 {
     $request->validate([
@@ -116,7 +130,9 @@ class TenantBillController extends Controller
     }
 
     $monthsToGenerate = [];
+    $skippedMonths = [];
 
+    // 🔁 Loop through all requested months
     for ($i = 0; $i < $request->months_count; $i++) {
         $billMonth = $request->month + $i;
         $billYear = $request->year;
@@ -126,23 +142,43 @@ class TenantBillController extends Controller
             $billYear++;
         }
 
+        // Check if bill already exists for this month
         $exists = \App\Models\TenantBill::where('lease_id', $lease->id)
             ->where('billing_type', $request->billing_type)
             ->where('billing_year', $billYear)
             ->where('billing_month', $billMonth)
             ->exists();
 
-        if (!$exists) {
+        if ($exists) {
+            $skippedMonths[] = "{$billYear}-" . str_pad($billMonth, 2, '0', STR_PAD_LEFT);
+        } else {
             $monthsToGenerate[] = ['year' => $billYear, 'month' => $billMonth];
         }
     }
 
-    if (count($monthsToGenerate) === 0) {
-        return response()->json([
-            'message' => 'No new bills generated. All months already have a bill of this type.'
-        ]);
-    }
+    // ⚠️ If all were duplicates
+    // if (count($monthsToGenerate) === 0) {
+    //     return response()->json([
+    //         'message' => 'No new bills generated. All selected months already have a bill of this type.',
+    //         'skipped_months' => $skippedMonths
+    //     ], 200);
+    // }
+    if (count($monthsToGenerate) < $request->months_count) {
+    return response()->json([
+        'message' => 'Some months already have a bill of this type. No bills were generated.',
+        'skipped_months' => collect(range(0, $request->months_count - 1))
+            ->map(function ($i) use ($request) {
+                $m = $request->month + $i;
+                $y = $request->year;
+                if ($m > 12) { $m -= 12; $y++; }
+                return sprintf('%04d-%02d', $y, $m);
+            })
+            ->toArray(),
+    ], 400);
+}
 
+
+    // 📅 Create new bill covering the missing months
     $startMonth = $monthsToGenerate[0];
     $endMonth = end($monthsToGenerate);
     $totalMonths = count($monthsToGenerate);
@@ -164,14 +200,23 @@ class TenantBillController extends Controller
         'billing_month' => $startMonth['month'],
         'days_used' => null,
     ]);
+$lease = \App\Models\Lease::with('tenant')->find($request->lease_id);
+$tenant = $lease->tenant;
+
+if ($tenant) {
+    event(new \App\Events\BillGeneratedEvent($tenant, $bill));
+}
 
     return response()->json([
         'message' => 'Bill generated successfully',
         'bill' => $bill,
+        'generated_months' => array_map(fn($m) => "{$m['year']}-" . str_pad($m['month'], 2, '0', STR_PAD_LEFT), $monthsToGenerate),
+        'skipped_months' => $skippedMonths,
         'per_month_amount' => $monthlyAmount,
-        'remaining' => $totalAmount, // since paid = 0
+        'remaining' => $totalAmount,
     ]);
+   
 }
- 
+
 }   
  

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Wallet;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
 class TenantForm extends Model
 {
@@ -56,4 +57,9 @@ protected static function booted()
     {
         return $this->hasOne(Wallet::class); // Tenant wallet
     }
+    public function user()
+{
+    return $this->belongsTo(User::class);
+}
+
 }

@@ -147,6 +147,12 @@ public function payBill(Request $request, $billId)
         'amount_paid_now' => $totalPayment,
         'total_paid' => $bill->paid_amount
     ]);
+    $tenant = $payment->tenant;
+
+if ($tenant && $tenant->user) {
+    $tenant->user->notify(new \App\Notifications\PaymentReceivedNotification($payment));
+}
+
 }
 
 

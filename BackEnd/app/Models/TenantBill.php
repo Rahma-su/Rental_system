@@ -1,13 +1,14 @@
 <?php
 
 namespace App\Models;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
 class TenantBill extends Model
 {
-    use HasFactory;
+   use HasFactory, SoftDeletes; 
 
     protected $table = 'tenant_bills';
 
@@ -43,4 +44,18 @@ class TenantBill extends Model
     {
         return $this->belongsTo(User::class); // optional: who created the bill
     }
+    public function tenant()
+{
+    return $this->belongsTo(TenantForm::class);
+}
+//     public function lease()
+// {
+//     return $this->belongsTo(Lease::class)->withTrashed(); // if Lease can be soft deleted
+// }
+
+// public function tenant()
+// {
+//     return $this->belongsTo(TenantForm::class)->withTrashed(); // if tenant can be soft deleted
+// }
+
 }
