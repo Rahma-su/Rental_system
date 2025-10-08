@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 
 class TenantForm extends Model
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $fillable = [
         'full_name',

@@ -11,6 +11,11 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         BillGeneratedEvent::class => [
             SendBillNotification::class,
+            PaymentReceivedEvent::class ,
+        SendPaymentReceivedNotification::class,
         ],
     ];
+    
+
+
 }
